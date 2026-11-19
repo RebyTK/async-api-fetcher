@@ -1,11 +1,10 @@
-
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
 import httpx
+import pytest
 
-from async_api_fetcher.services import fetch_user
 from async_api_fetcher.models import UserResponse
+from async_api_fetcher.services import fetch_user
 
 
 @pytest.mark.asyncio
@@ -20,9 +19,7 @@ async def test_no_cache_skips_cache_operations():
         "id": 1,
         "name": "Leanne Graham",
         "email": "test@example.com",
-        "address": {
-            "city": "Gwenborough"
-        }
+        "address": {"city": "Gwenborough"},
     }
 
     mock_response.raise_for_status.return_value = None
@@ -33,20 +30,10 @@ async def test_no_cache_skips_cache_operations():
     mock_client.get.return_value = mock_response
 
     with (
-        patch(
-            "async_api_fetcher.services.load_cache"
-        ) as mock_load,
-
-        patch(
-            "async_api_fetcher.services.save_cache"
-        ) as mock_save,
+        patch("async_api_fetcher.services.load_cache") as mock_load,
+        patch("async_api_fetcher.services.save_cache") as mock_save,
     ):
-
-        result = await fetch_user(
-            mock_client,
-            1,
-            use_cache=False
-        )
+        result = await fetch_user(mock_client, 1, use_cache=False)
 
         # Verify Pydantic validation
         assert result.id == 1
@@ -60,6 +47,7 @@ async def test_no_cache_skips_cache_operations():
         # Verify HTTP request was executed
         mock_client.get.assert_awaited_once()
 
+
 @pytest.mark.asyncio
 async def test_cache_enabled_reads_cache():
 
@@ -67,27 +55,18 @@ async def test_cache_enabled_reads_cache():
         "id": 1,
         "name": "Leanne Graham",
         "email": "test@example.com",
-        "city": "Gwenborough"
+        "city": "Gwenborough",
     }
 
     mock_client = AsyncMock(spec=httpx.AsyncClient)
 
     with (
         patch(
-            "async_api_fetcher.services.load_cache",
-            return_value=cached_data
+            "async_api_fetcher.services.load_cache", return_value=cached_data
         ) as mock_load,
-
-        patch(
-            "async_api_fetcher.services.save_cache"
-        ) as mock_save,
+        patch("async_api_fetcher.services.save_cache") as mock_save,
     ):
-
-        result = await fetch_user(
-            mock_client,
-            1,
-            use_cache=True
-        )
+        result = await fetch_user(mock_client, 1, use_cache=True)
 
         assert isinstance(result, UserResponse)
 

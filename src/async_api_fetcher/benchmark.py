@@ -1,18 +1,16 @@
 import asyncio
-import time
-import httpx
 import statistics
+import time
 
-from async_api_fetcher.services import (
-    fetch_user,
-    fetch_weather,
-    fetch_country
-)
+import httpx
+
 from async_api_fetcher.cache import delete_cache
+from async_api_fetcher.services import fetch_country, fetch_user, fetch_weather
 
 
 def calculate_median(times: list[float]) -> float:
     return statistics.median(times)
+
 
 def clear_benchmark_cache():
 
@@ -41,7 +39,7 @@ async def concurrent_execution(client):
     results = await asyncio.gather(
         fetch_user(client, 1),
         fetch_weather(client, "Delhi"),
-        fetch_country(client, "Sweden")
+        fetch_country(client, "Sweden"),
     )
 
     elapsed = time.perf_counter() - start
@@ -57,12 +55,10 @@ async def main():
     runs = 5
 
     async with httpx.AsyncClient(timeout=15.0) as client:
-
         # Sequential benchmarks
         print("\nSEQUENTIAL BENCHMARK")
 
         for run in range(runs):
-
             clear_benchmark_cache()
 
             _, elapsed = await sequential_execution(client)
@@ -75,7 +71,6 @@ async def main():
         print("\nCONCURRENT BENCHMARK")
 
         for run in range(runs):
-
             clear_benchmark_cache()
 
             _, elapsed = await concurrent_execution(client)

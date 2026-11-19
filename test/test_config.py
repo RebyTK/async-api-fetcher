@@ -1,4 +1,3 @@
-
 import pytest
 from pydantic import ValidationError
 
@@ -18,12 +17,7 @@ def test_default_settings():
 
 def test_custom_settings():
 
-    config = Settings(
-        _env_file=None,
-        http_timeout=20,
-        max_retries=5,
-        weather_ttl=600
-    )
+    config = Settings(_env_file=None, http_timeout=20, max_retries=5, weather_ttl=600)
 
     assert config.http_timeout == 20
     assert config.max_retries == 5
@@ -33,18 +27,10 @@ def test_custom_settings():
 def test_invalid_timeout():
 
     with pytest.raises(ValidationError):
-
-        Settings(
-            _env_file=None,
-            http_timeout=-5
-        )
+        Settings(_env_file=None, http_timeout=-5)
 
 
 def test_invalid_retries():
 
     with pytest.raises(ValidationError):
-
-        Settings(
-            _env_file=None,
-            max_retries=0
-        )
+        Settings(_env_file=None, max_retries=0)

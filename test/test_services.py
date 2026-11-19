@@ -1,10 +1,10 @@
 from unittest.mock import AsyncMock, Mock, patch
 
-import pytest
 import httpx
+import pytest
 
-from async_api_fetcher.services import fetch_user
 from async_api_fetcher.models import UserResponse
+from async_api_fetcher.services import fetch_user
 
 
 @pytest.mark.asyncio
@@ -18,9 +18,7 @@ async def test_fetch_user_success():
         "id": 1,
         "name": "Leanne Graham",
         "email": "test@example.com",
-        "address": {
-            "city": "Gwenborough"
-        }
+        "address": {"city": "Gwenborough"},
     }
 
     mock_response.raise_for_status.return_value = None
@@ -30,21 +28,10 @@ async def test_fetch_user_success():
     mock_client.get.return_value = mock_response
 
     with (
-        patch(
-            "async_api_fetcher.services.load_cache",
-            return_value=None
-        ) as mock_load,
-
-        patch(
-            "async_api_fetcher.services.save_cache"
-        ) as mock_save,
+        patch("async_api_fetcher.services.load_cache", return_value=None) as mock_load,
+        patch("async_api_fetcher.services.save_cache") as mock_save,
     ):
-
-        result = await fetch_user(
-            mock_client,
-            1,
-            use_cache=True
-        )
+        result = await fetch_user(mock_client, 1, use_cache=True)
 
         # Verify Pydantic model
         assert isinstance(result, UserResponse)
@@ -69,29 +56,18 @@ async def test_fetch_user_invalid_response():
 
     mock_response = Mock()
 
-    mock_response.json.return_value = [
-        {"unexpected": "data"}
-    ]
+    mock_response.json.return_value = [{"unexpected": "data"}]
 
     mock_response.raise_for_status.return_value = None
 
     mock_client = AsyncMock(spec=httpx.AsyncClient)
     mock_client.get.return_value = mock_response
 
-    with patch(
-        "async_api_fetcher.services.load_cache",
-        return_value=None
+    with (
+        patch("async_api_fetcher.services.load_cache", return_value=None),
+        pytest.raises(TypeError, match="Unexpected user response format"),
     ):
-
-        with pytest.raises(
-            ValueError,
-            match="Unexpected user response format"
-        ):
-            await fetch_user(
-                mock_client,
-                1,
-                use_cache=True
-            )
+        await fetch_user(mock_client, 1, use_cache=True)
 
 
 @pytest.mark.asyncio
@@ -100,15 +76,10 @@ async def test_fetch_user_retries_after_503():
     mock_response_503 = Mock()
     mock_response_503.status_code = 503
 
-    mock_response_503.raise_for_status.side_effect = (
-        httpx.HTTPStatusError(
-            "Service unavailable",
-            request=Mock(),
-            response=Mock(
-                status_code=503,
-                request=Mock()
-            )
-        )
+    mock_response_503.raise_for_status.side_effect = httpx.HTTPStatusError(
+        "Service unavailable",
+        request=Mock(),
+        response=Mock(status_code=503, request=Mock()),
     )
 
     mock_response_200 = Mock()
@@ -120,37 +91,21 @@ async def test_fetch_user_retries_after_503():
         "id": 1,
         "name": "Leanne Graham",
         "email": "test@example.com",
-        "address": {
-            "city": "Gwenborough"
-        }
+        "address": {"city": "Gwenborough"},
     }
 
     mock_client = AsyncMock(spec=httpx.AsyncClient)
 
-    mock_client.get.side_effect = [
-        mock_response_503,
-        mock_response_200
-    ]
+    mock_client.get.side_effect = [mock_response_503, mock_response_200]
 
     with (
+        patch("async_api_fetcher.services.load_cache", return_value=None),
+        patch("async_api_fetcher.services.save_cache"),
         patch(
-            "async_api_fetcher.services.load_cache",
-            return_value=None
-        ),
-        patch(
-            "async_api_fetcher.services.save_cache"
-        ),
-        patch(
-            "async_api_fetcher.services.asyncio.sleep",
-            new_callable=AsyncMock
+            "async_api_fetcher.services.asyncio.sleep", new_callable=AsyncMock
         ) as mock_sleep,
     ):
-
-        result = await fetch_user(
-            mock_client,
-            1,
-            use_cache=True
-        )
+        result = await fetch_user(mock_client, 1, use_cache=True)
 
         assert isinstance(result, UserResponse)
         assert result.name == "Leanne Graham"

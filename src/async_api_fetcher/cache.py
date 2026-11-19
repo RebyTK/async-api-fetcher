@@ -1,9 +1,7 @@
-
-import json
-import time
 import hashlib
+import json
 import logging
-
+import time
 from pathlib import Path
 from typing import Any
 
@@ -15,29 +13,16 @@ CACHE_DIR = Path("cache")
 def get_cache_path(key: str) -> Path:
     """Generate a unique cache filename."""
 
-    safe_key = hashlib.sha256(
-        key.encode("utf-8")
-    ).hexdigest()
+    safe_key = hashlib.sha256(key.encode("utf-8")).hexdigest()
 
     return CACHE_DIR / f"{safe_key}.json"
 
 
-def save_cache(
-    key: str,
-    data: dict[str, Any],
-    ttl: int
-) -> None:
+def save_cache(key: str, data: dict[str, Any], ttl: int) -> None:
 
-    CACHE_DIR.mkdir(
-        parents=True,
-        exist_ok=True
-    )
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    cache_data = {
-        "cached_at": time.time(),
-        "ttl": ttl,
-        "data": data
-    }
+    cache_data = {"cached_at": time.time(), "ttl": ttl, "data": data}
 
     cache_file = get_cache_path(key)
 
@@ -59,7 +44,7 @@ def load_cache(key: str) -> dict[str, Any] | None:
             cached_data = json.load(f)
 
         if not isinstance(cached_data, dict):
-            raise ValueError("Invalid cache structure")
+            raise TypeError("Invalid cache structure")
 
         cached_at = cached_data["cached_at"]
         ttl = cached_data["ttl"]
@@ -80,23 +65,14 @@ def load_cache(key: str) -> dict[str, Any] | None:
             return None
 
         if not isinstance(data, dict):
-            raise ValueError("Invalid cached data")
+            raise TypeError("Invalid cached data")
 
         logger.debug("Cache hit: %s", key)
 
         return data
 
-    except (
-        OSError,
-        json.JSONDecodeError,
-        KeyError,
-        TypeError,
-        ValueError
-    ):
-        logger.warning(
-            "Corrupted cache detected: %s",
-            key
-        )
+    except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        logger.warning("Corrupted cache detected: %s", key)
 
         delete_cache(key)
 
@@ -106,14 +82,9 @@ def load_cache(key: str) -> dict[str, Any] | None:
 def delete_cache(key: str) -> None:
 
     cache_file = get_cache_path(key)
-
     try:
         cache_file.unlink(missing_ok=True)
-
         logger.debug("Cache deleted: %s", key)
 
     except OSError:
-        logger.exception(
-            "Failed to delete cache: %s",
-            key
-        )
+        logger.exception("Failed to delete cache: %s", key)

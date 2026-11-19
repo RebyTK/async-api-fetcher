@@ -1,4 +1,3 @@
-
 import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -6,31 +5,19 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from async_api_fetcher.main import async_main
-from async_api_fetcher.models import (
-    UserResponse,
-    WeatherResponse,
-    CountryResponse
-)
+from async_api_fetcher.models import CountryResponse, UserResponse, WeatherResponse
 
 
 def make_args():
     return SimpleNamespace(
-        user_id=1,
-        weather_location="Delhi",
-        country="Sweden",
-        no_cache=False
+        user_id=1, weather_location="Delhi", country="Sweden", no_cache=False
     )
 
 
 @pytest.mark.asyncio
-async def test_one_api_failure_does_not_stop_others(
-    capsys,
-    caplog
-):
+async def test_one_api_failure_does_not_stop_others(capsys, caplog):
 
-    mock_user = AsyncMock(
-        side_effect=RuntimeError("User API unavailable")
-    )
+    mock_user = AsyncMock(side_effect=RuntimeError("User API unavailable"))
 
     mock_weather = AsyncMock(
         return_value=WeatherResponse(
@@ -38,33 +25,21 @@ async def test_one_api_failure_does_not_stop_others(
             country="India",
             temperature=25.0,
             humidity=45.0,
-            wind_speed=7.2
+            wind_speed=7.2,
         )
     )
 
     mock_country = AsyncMock(
         return_value=CountryResponse(
-            name="Sweden",
-            population=10621725,
-            region="Europe"
+            name="Sweden", population=10621725, region="Europe"
         )
     )
 
     with (
-        patch(
-            "async_api_fetcher.main.fetch_user",
-            new=mock_user
-        ),
-        patch(
-            "async_api_fetcher.main.fetch_weather",
-            new=mock_weather
-        ),
-        patch(
-            "async_api_fetcher.main.fetch_country",
-            new=mock_country
-        ),
+        patch("async_api_fetcher.main.fetch_user", new=mock_user),
+        patch("async_api_fetcher.main.fetch_weather", new=mock_weather),
+        patch("async_api_fetcher.main.fetch_country", new=mock_country),
     ):
-
         await async_main(make_args())
 
     # All APIs must execute
@@ -104,10 +79,7 @@ async def test_all_apis_execute_concurrently():
         return result
 
     user_result = UserResponse(
-        id=1,
-        name="Leanne Graham",
-        email="test@example.com",
-        city="Gwenborough"
+        id=1, name="Leanne Graham", email="test@example.com", city="Gwenborough"
     )
 
     weather_result = WeatherResponse(
@@ -115,13 +87,11 @@ async def test_all_apis_execute_concurrently():
         country="India",
         temperature=25.0,
         humidity=45.0,
-        wind_speed=7.2
+        wind_speed=7.2,
     )
 
     country_result = CountryResponse(
-        name="Sweden",
-        population=10621725,
-        region="Europe"
+        name="Sweden", population=10621725, region="Europe"
     )
 
     # Explicitly asynchronous mock functions
@@ -135,35 +105,18 @@ async def test_all_apis_execute_concurrently():
         return await mock_api(country_result)
 
     with (
-        patch(
-            "async_api_fetcher.main.fetch_user",
-            new=mock_user
-        ),
-        patch(
-            "async_api_fetcher.main.fetch_weather",
-            new=mock_weather
-        ),
-        patch(
-            "async_api_fetcher.main.fetch_country",
-            new=mock_country
-        ),
+        patch("async_api_fetcher.main.fetch_user", new=mock_user),
+        patch("async_api_fetcher.main.fetch_weather", new=mock_weather),
+        patch("async_api_fetcher.main.fetch_country", new=mock_country),
     ):
-
-        task = asyncio.create_task(
-            async_main(make_args())
-        )
+        task = asyncio.create_task(async_main(make_args()))
 
         try:
-
-            await asyncio.wait_for(
-                all_started.wait(),
-                timeout=2.0
-            )
+            await asyncio.wait_for(all_started.wait(), timeout=2.0)
 
             assert started_count == 3
 
         finally:
-
             release.set()
 
         await task
