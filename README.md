@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/RebyTK/async-api-fetcher/actions/workflows/ci.yml/badge.svg)](https://github.com/RebyTK/async-api-fetcher/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-not%20specified-lightgrey)](https://github.com/RebyTK/async-api-fetcher)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An asynchronous Python command-line application that retrieves user, current weather, and country information from three public APIs concurrently.
 
@@ -73,6 +73,7 @@ async-api-fetcher/
 ├── .env.example
 ├── .gitignore
 ├── .python-version
+├── LICENSE
 ├── pyproject.toml
 ├── README.md
 └── uv.lock
@@ -281,4 +282,4 @@ The Async Multi-API Fetcher retrieves user, weather, and country information con
 
 ## License
 
-No license has currently been specified for this repository. Unless a license is added, standard copyright restrictions apply to reuse and redistribution.
+This project is licensed under the [MIT License](LICENSE).
