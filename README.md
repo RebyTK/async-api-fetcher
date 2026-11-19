@@ -271,6 +271,14 @@ Contributions and suggestions are welcome.
 4. Run pytest and Ruff locally.
 5. Open a pull request against `main`.
 
+## Application Demo
+
+The Async Multi-API Fetcher retrieves user, weather, and country information concurrently through a single CLI command.
+
+### CLI Output
+
+![Async Multi-API Fetcher CLI Output](docs/images/cli-output.png)
+
 ## License
 
 No license has currently been specified for this repository. Unless a license is added, standard copyright restrictions apply to reuse and redistribution.
