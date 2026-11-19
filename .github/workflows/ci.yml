@@ -1,0 +1,59 @@
+name: Async API Fetcher CI
+
+# Trigger workflow on pushes and pull requests
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  # Allow manual execution
+  workflow_dispatch:
+
+# Minimum permissions required
+permissions:
+  contents: read
+
+# Cancel older workflow runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  test:
+    name: Test Python 3.12
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 10
+
+    steps:
+
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install uv and Python
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: |
+            uv.lock
+            pyproject.toml
+
+      # Step 3: Install project and development dependencies
+      - name: Install dependencies
+        run: uv sync --locked --all-groups
+
+      # Step 4: Run automated tests
+      - name: Run pytest
+        run: uv run --locked pytest -v
+
+      # Step 5: Run Ruff lint checks
+      - name: Run Ruff
+        run: uv run --locked ruff check src test
